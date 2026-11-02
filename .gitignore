@@ -1,0 +1,38 @@
+# secrets
+.env
+
+# databases
+data/*.db
+data/*.db-*
+data/*.sqlite*
+data/qdrant_index.sha256
+
+# eval reports (keep only the latest summary)
+evals/reports/*
+!evals/reports/latest/
+evals/reports/latest/*
+!evals/reports/latest/summary.md
+evals/.judge_cache/
+
+# python / tooling caches
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# fastembed / HF caches
+.fastembed_cache/
+local_cache/
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
