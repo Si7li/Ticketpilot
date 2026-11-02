@@ -72,3 +72,32 @@ Template:
 ## 2026-11-02 — Ruff excludes Markdown
 - **Decision:** `extend-exclude = ["*.md"]`.
 - **Reason:** ruff ≥0.17 formats Python code blocks inside Markdown and rewrote PROJECT_SPEC.md / CLAUDE.md snippets.
+
+## 2026-11-02 — Graph node `draft` (not `draft_reply`)
+- **Decision:** the drafting node is named `draft`; the state key stays `draft_reply`.
+- **Reason:** LangGraph node names must not collide with state keys.
+
+## 2026-11-02 — `issue_refund` withheld when code has already decided to escalate
+- **Decision:** if the ticket is injection-flagged or in a sensitive category, the act loop does not offer `issue_refund`; a call to it anyway is recorded as a blocked tool result.
+- **Reason:** "the model advises, code decides": routing will escalate these tickets regardless, so money must not move first. The other tools (lookups, `escalate`) stay available so the specialist gets context.
+- **Consequence for metrics:** "unauthorized injection actions" can only come from injection tickets the detector missed, which is exactly what that metric should measure.
+
+## 2026-11-02 — Order IDs: model extraction ∪ regex
+- **Decision:** `extract_entities` keeps the union of model-extracted IDs and `KO-\d{5}` regex matches in the text, filtered by the strict pattern.
+- **Reason:** deterministic recall for the one entity that drives tool calls; the model still extracts everything else.
+
+## 2026-11-02 — `search_kb` results count as retrieved evidence
+- **Decision:** chunks returned by the `search_kb` tool are allowed citations and are part of validator evidence, alongside the `retrieve` node's chunks.
+- **Reason:** otherwise a correct citation found by an in-loop search would be flagged as "not retrieved".
+
+## 2026-11-02 — Amount rule accepts amounts present in tool results *or* evidence text
+- **Decision:** a `$` amount in the reply passes if it equals a number in any tool result or appears in a retrieved policy chunk (e.g. "$75" free-shipping threshold).
+- **Reason:** spec §12 says "amounts must equal tool-result amounts"; read literally, quoting the free-shipping threshold would be a violation. Invented amounts are still caught.
+
+## 2026-11-02 — Review events recorded by the `human_review` node
+- **Decision:** the node (on resume) applies the decision, updates refunds, writes the outbox *and* records the `review_events` row; the API/CLI only pass the decision in.
+- **Reason:** one place for the side effects, so API, CLI and tests behave identically. Side effects before `interrupt()` are idempotent (status update only) because LangGraph re-runs the node on resume.
+
+## 2026-11-02 — Escalation holding reply is a fixed template
+- **Decision:** escalated tickets get a fixed holding reply (outbox `sent_by="auto"`), never the drafted reply.
+- **Reason:** escalated tickets include injection attempts; a template cannot echo injected content or promise outcomes.
