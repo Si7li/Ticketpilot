@@ -1,0 +1,41 @@
+name: Eval (dev split)
+
+# Real LLM calls: costs money. Runs on demand and nightly.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      LOG_LEVEL: WARNING
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Check secret
+        run: test -n "$ANTHROPIC_API_KEY" || (echo "ANTHROPIC_API_KEY secret is not set" && exit 1)
+      - name: Install
+        run: uv sync --frozen --all-extras
+      - name: Seed DB
+        run: make seed
+      - name: Index KB
+        run: make index
+      - name: Run harness (dev split)
+        run: uv run python -m evals.harness --split dev
+      - name: Locate report
+        id: report
+        run: echo "dir=$(ls -d evals/reports/*-dev | sort | tail -1)" >> "$GITHUB_OUTPUT"
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report-${{ github.run_id }}
+          path: ${{ steps.report.outputs.dir }}
+      - name: Regression gate
+        run: uv run python -m evals.gate --current ${{ steps.report.outputs.dir }}/metrics.json --baseline evals/baseline.json
