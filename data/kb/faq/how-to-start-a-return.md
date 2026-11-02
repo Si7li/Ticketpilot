@@ -11,5 +11,5 @@ Sign in, go to **Orders**, choose the order, and select **Start a return**. You 
 ## Packing your return
 Pack items unused with tags attached, in their original packaging if possible, and include the return slip.
 
-## After we receive it
-We inspect returns and issue the refund according to our refund methods policy.
+## Your refund
+Your refund is set up when the return is requested within the return window, following our refund methods policy. Refunds of more than $100 are reviewed by our team first.

@@ -20,4 +20,4 @@ For international returns the customer pays return shipping. We recommend a trac
 Items marked **final sale** cannot be returned. Sale items that are not final sale are refunded as store credit. Opened electronics carry a restocking fee.
 
 ## How your refund is paid
-Once your return is received and inspected, the refund goes back to the original payment method within 5–7 business days, or instantly as store credit if you prefer.
+When you request a return within the window, we set up your refund right away. Refunds to the original payment method arrive within 5–7 business days; store credit is instant. Please send the item back unused with tags attached so the return can be completed.

@@ -1,0 +1,73 @@
+dataset: bitext/Bitext-customer-support-llm-chatbot-training-dataset
+note: Bitext intents mapped to TicketPilot categories. Bitext has no product-question
+  or sensitive intents; those come from drafted tickets (product_questions.jsonl,
+  hard_cases.jsonl). 'complaint' is rewritten into concrete delivery problems.
+mapped:
+  cancel_order:
+    category: order_status
+    recipe: cancel
+  change_order:
+    category: order_status
+    recipe: change_order
+  change_shipping_address:
+    category: order_status
+    recipe: address
+  check_invoice:
+    category: account_billing
+    recipe: invoice
+  check_payment_methods:
+    category: account_billing
+    recipe: payment_methods
+  check_refund_policy:
+    category: returns_refunds
+    recipe: refund_policy
+  complaint:
+    category: shipping_problem
+    recipe: complaint
+  create_account:
+    category: account_billing
+    recipe: create_account
+  delete_account:
+    category: account_billing
+    recipe: delete_account
+  delivery_options:
+    category: order_status
+    recipe: delivery_options
+  delivery_period:
+    category: order_status
+    recipe: delivery_period
+  edit_account:
+    category: account_billing
+    recipe: edit_account
+  get_invoice:
+    category: account_billing
+    recipe: invoice
+  get_refund:
+    category: returns_refunds
+    recipe: refund
+  payment_issue:
+    category: account_billing
+    recipe: payment_issue
+  recover_password:
+    category: account_billing
+    recipe: password
+  registration_problems:
+    category: account_billing
+    recipe: password
+  set_up_shipping_address:
+    category: order_status
+    recipe: address
+  track_order:
+    category: order_status
+    recipe: track
+  track_refund:
+    category: returns_refunds
+    recipe: track_refund
+dropped:
+  check_cancellation_fee: no cancellation fees exist in Kestrel policy
+  contact_customer_service: meta-request, no category fits
+  contact_human_agent: meta-request, no category fits
+  newsletter_subscription: no newsletter policy
+  place_order: sales, not support
+  review: feedback, not support
+  switch_account: "ambiguous (multiple accounts) \u2014 no policy"
