@@ -1,8 +1,6 @@
 # TicketPilot
 
-An agentic support-triage system with hybrid RAG for **Kestrel Outfitters**, a fictional outdoor-gear store. TicketPilot reads a customer ticket, retrieves the relevant policy, looks up the order, issues refunds behind code-enforced guardrails, drafts a cited reply, validates it, and routes the ticket to **auto-send**, **human review** (the graph pauses and resumes on the reviewer's decision), or **escalate**. Quality numbers are added to this README only by `scripts/update_readme_results.py` from real evaluation runs against human-verified labels.
-
-**Demo video:** _placeholder — not recorded yet._
+An agentic support-triage system with hybrid RAG for **Kestrel Outfitters**, a fictional outdoor-gear store. TicketPilot reads a customer ticket, retrieves the relevant policy, looks up the order, issues refunds behind code-enforced guardrails, drafts a cited reply, validates it, and routes the ticket to **auto-send**, **human review** (the graph pauses and resumes on the reviewer's decision), or **escalate**.
 
 ---
 
