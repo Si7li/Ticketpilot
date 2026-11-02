@@ -28,7 +28,7 @@ from ticketpilot.schemas import (
     Evidence,
     ValidationResult,
 )
-from ticketpilot.telemetry import UsageTracker, langfuse_handler
+from ticketpilot.telemetry import UsageTracker, langfuse_handler, langfuse_metadata
 
 log = logging.getLogger("ticketpilot.llm")
 
@@ -128,7 +128,7 @@ class AnthropicBackend:
         handler = langfuse_handler(self.settings)
         if handler is None:
             return None
-        return {"callbacks": [handler], "metadata": {"prompt_version": prompts.PROMPT_VERSION}}
+        return {"callbacks": [handler], "metadata": langfuse_metadata(prompts.PROMPT_VERSION)}
 
     def classify(self, text: str) -> Classification:
         return self._structured.call(

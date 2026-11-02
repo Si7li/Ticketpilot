@@ -138,3 +138,7 @@ Template:
 ## 2026-11-02 — Retriever searches are serialized with a lock
 - **Decision:** `HybridRetriever.search` takes a lock.
 - **Reason:** API thread pool and eval concurrency share one in-memory Qdrant client + embedder whose thread-safety is not documented; searches are milliseconds next to LLM calls.
+
+## 2026-11-02 — Langfuse trace tagging
+- **Decision:** every model call carries `langfuse_session_id = ticket ID`, `langfuse_trace_name`, and tags `prompt:<version>` and `node:<name>` (via a ContextVar set in the node wrapper). The route is logged in the terminal node's structured JSON log line and stored in results/API output.
+- **Reason:** routing happens after the last LLM call, so the route cannot be attached to the LLM traces without an extra Langfuse API call per ticket; session ID links all calls for a ticket for lookup.

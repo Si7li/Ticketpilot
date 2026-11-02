@@ -34,7 +34,7 @@ from ticketpilot.schemas import (
     Evidence,
     is_valid_order_id,
 )
-from ticketpilot.telemetry import log_node, merge_usage, node_timer, usage_scope
+from ticketpilot.telemetry import log_node, merge_usage, node_timer, trace_context, usage_scope
 from ticketpilot.tools.registry import ToolContext, ToolRegistry
 
 log = logging.getLogger("ticketpilot.graph")
@@ -64,7 +64,11 @@ def _node(name: str, fn: NodeFn, deps: Deps) -> Callable[[TicketState], dict[str
     def run(state: TicketState) -> dict[str, Any]:
         update: dict[str, Any]
         outcome = "ok"
-        with node_timer() as t, usage_scope() as scope:
+        with (
+            node_timer() as t,
+            usage_scope() as scope,
+            trace_context(state.get("ticket_id", "?"), name),
+        ):
             try:
                 update = fn(state, deps)
             except GraphBubbleUp:
@@ -77,7 +81,8 @@ def _node(name: str, fn: NodeFn, deps: Deps) -> Callable[[TicketState], dict[str
                 }
         timings = {**state.get("timings_ms", {}), name: t["ms"]}
         usage = merge_usage(state.get("usage", {}), name, scope)
-        log_node(state.get("ticket_id", "?"), name, t["ms"], outcome)
+        extra = {"route": update["route"]} if "route" in update else {}
+        log_node(state.get("ticket_id", "?"), name, t["ms"], outcome, **extra)
         return {**update, "timings_ms": timings, "usage": usage}
 
     run.__name__ = name

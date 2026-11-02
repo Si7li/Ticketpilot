@@ -152,3 +152,12 @@ def test_network_guard_blocks_external_hosts() -> None:
             s.connect(("93.184.216.34", 80))
     finally:
         s.close()
+
+
+def test_trace_context_feeds_langfuse_metadata() -> None:
+    assert T.langfuse_metadata("v1")["langfuse_session_id"] == "unknown"
+    with T.trace_context("T-0042", "classify"):
+        md = T.langfuse_metadata("v1")
+        assert md["langfuse_session_id"] == "T-0042" and md["ticket_id"] == "T-0042"
+        assert md["langfuse_tags"] == ["prompt:v1", "node:classify"]
+    assert T.current_trace() == {}

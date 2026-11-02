@@ -210,6 +210,42 @@ def log_node(ticket_id: str, node: str, duration_ms: float, outcome: str, **extr
 
 
 # ---------------------------------------------------------------------------
+# Trace context (which ticket / node an LLM call belongs to)
+# ---------------------------------------------------------------------------
+
+_trace_ctx: ContextVar[dict[str, str] | None] = ContextVar("ticketpilot_trace", default=None)
+
+
+@contextmanager
+def trace_context(ticket_id: str, node: str) -> Iterator[None]:
+    token = _trace_ctx.set({"ticket_id": ticket_id, "node": node})
+    try:
+        yield
+    finally:
+        _trace_ctx.reset(token)
+
+
+def current_trace() -> dict[str, str]:
+    return dict(_trace_ctx.get() or {})
+
+
+def langfuse_metadata(prompt_version: str) -> dict[str, Any]:
+    """Metadata keys the Langfuse LangChain handler maps onto the trace."""
+    ctx = current_trace()
+    ticket = ctx.get("ticket_id", "unknown")
+    tags = [f"prompt:{prompt_version}"]
+    if ctx.get("node"):
+        tags.append(f"node:{ctx['node']}")
+    return {
+        "langfuse_session_id": ticket,
+        "langfuse_trace_name": f"ticket {ticket}",
+        "langfuse_tags": tags,
+        "ticket_id": ticket,
+        "prompt_version": prompt_version,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Optional Langfuse
 # ---------------------------------------------------------------------------
 
