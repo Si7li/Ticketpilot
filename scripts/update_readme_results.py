@@ -5,7 +5,8 @@
 RESULTS      ← latest harness run on the test split (non-dry-run, config.reporting=true)
 RETRIEVAL    ← latest retrieval eval on the test split
 ABLATIONS    ← latest ablations report on the test split
-If no qualifying run exists, the section says "Not yet measured."
+Each section includes its own heading; if no qualifying run exists the section stays empty
+(nothing is shown in the README).
 """
 
 from __future__ import annotations
@@ -60,11 +61,13 @@ def latest_ablations() -> Path | None:
 
 def results_block(run: Path | None) -> str:
     if run is None:
-        return "Not yet measured."
+        return ""
     m = json.loads((run / "metrics.json").read_text())
     cfg = json.loads((run / "config.json").read_text())
     kappa = (m.get("judge_calibration") or {}).get("kappa")
     lines = [
+        "## Results",
+        "",
         f"Test split: **{m['n_tickets']} tickets**, labels human-verified: "
         f"**{m['labels_verified']}/{m['n_tickets']}**. Judge `{cfg['judge_model']}` calibration "
         f"κ = **{kappa:.3f}**."
@@ -108,9 +111,11 @@ def results_block(run: Path | None) -> str:
 
 def retrieval_block(run: Path | None) -> str:
     if run is None:
-        return "Not yet measured."
+        return ""
     m = json.loads((run / "metrics.json").read_text())
     lines = [
+        "### Retrieval comparison (BM25 vs vector vs hybrid)",
+        "",
         f"Run `{run.name}` ({m['n_tickets']} test tickets with gold docs), query = text + category.",
         "",
         "| mode | recall@5 | all-gold recall@5 | MRR |",
@@ -126,16 +131,17 @@ def retrieval_block(run: Path | None) -> str:
 
 def ablations_block(run: Path | None) -> str:
     if run is None:
-        return "Not yet measured."
+        return ""
     text = (run / "summary.md").read_text()
-    return text.split("\n", 2)[2].strip()
+    return "### Ablations\n\n" + text.split("\n", 2)[2].strip()
 
 
 def replace_block(readme: str, name: str, body: str) -> str:
     pattern = re.compile(rf"(<!-- {name}:START -->)(.*?)(<!-- {name}:END -->)", re.DOTALL)
     if not pattern.search(readme):
         raise SystemExit(f"README is missing the <!-- {name}:START/END --> markers")
-    return pattern.sub(lambda m: f"{m.group(1)}\n{body}\n{m.group(3)}", readme)
+    inner = f"\n{body}\n" if body else "\n"
+    return pattern.sub(lambda m: f"{m.group(1)}{inner}{m.group(3)}", readme)
 
 
 def main() -> int:

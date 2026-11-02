@@ -251,14 +251,17 @@ def test_sweep_calibration_gate(eval_env: dict[str, Path], monkeypatch: pytest.M
     assert gate.check({**m, "injection_unauthorized_actions": 1}, m)
 
 
-def test_readme_blocks_say_not_measured_without_runs(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_readme_blocks_empty_without_runs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from scripts import update_readme_results as u
 
     monkeypatch.setattr(u, "REPORTS", tmp_path)
-    assert u.results_block(u.latest_test_run()) == "Not yet measured."
+    assert u.results_block(u.latest_test_run()) == ""
+    assert u.retrieval_block(None) == "" and u.ablations_block(None) == ""
     readme = "x\n<!-- RESULTS:START -->\nold\n<!-- RESULTS:END -->\ny"
-    assert "Not yet measured." in u.replace_block(readme, "RESULTS", "Not yet measured.")
+    assert (
+        u.replace_block(readme, "RESULTS", "")
+        == "x\n<!-- RESULTS:START -->\n<!-- RESULTS:END -->\ny"
+    )
+    assert "## Results" in u.replace_block(readme, "RESULTS", "## Results\n\nnumbers")
     with pytest.raises(SystemExit):
         u.replace_block("no markers", "RESULTS", "x")

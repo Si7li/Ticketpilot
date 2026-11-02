@@ -1,6 +1,6 @@
 # TicketPilot
 
-An agentic support-triage system with hybrid RAG for **Kestrel Outfitters**, a fictional outdoor-gear store. TicketPilot reads a customer ticket, retrieves the relevant policy, looks up the order, issues refunds behind code-enforced guardrails, drafts a cited reply, validates it, and routes the ticket to **auto-send**, **human review** (the graph pauses and resumes on the reviewer's decision), or **escalate**. Every quality claim below comes from an evaluation harness run against human-verified labels — or says that it hasn't been measured yet.
+An agentic support-triage system with hybrid RAG for **Kestrel Outfitters**, a fictional outdoor-gear store. TicketPilot reads a customer ticket, retrieves the relevant policy, looks up the order, issues refunds behind code-enforced guardrails, drafts a cited reply, validates it, and routes the ticket to **auto-send**, **human review** (the graph pauses and resumes on the reviewer's decision), or **escalate**. Quality numbers are added to this README only by `scripts/update_readme_results.py` from real evaluation runs against human-verified labels.
 
 **Demo video:** _placeholder — not recorded yet._
 
@@ -41,29 +41,14 @@ flowchart TD
 
 ---
 
-## Results
-
 <!-- RESULTS:START -->
-Not yet measured.
 <!-- RESULTS:END -->
 
-### Retrieval comparison (BM25 vs vector vs hybrid)
-
 <!-- RETRIEVAL:START -->
-Not yet measured.
 <!-- RETRIEVAL:END -->
 
-### Ablations
-
 <!-- ABLATIONS:START -->
-Not yet measured.
 <!-- ABLATIONS:END -->
-
-_These three sections are written only by `scripts/update_readme_results.py` from real report files under `evals/reports/`. Never edit them by hand._
-
-## Failure analysis
-
-_To be written by a human from `failures.md` of the reported test run._
 
 ---
 
