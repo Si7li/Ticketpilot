@@ -20,7 +20,7 @@ def main() -> None:
     chunks = chunk_kb(s.kb_dir)
     print(f"{len(docs)} documents → {len(chunks)} chunks (hash {chunk_set_hash(chunks)[:12]})")
     t0 = time.perf_counter()
-    embedder = FastEmbedEmbedder(s.EMBEDDING_MODEL)
+    embedder = FastEmbedEmbedder(s.EMBEDDING_MODEL, s.FASTEMBED_CACHE_DIR)
     index = VectorIndex(make_qdrant_client(s.QDRANT_URL), s.QDRANT_COLLECTION, embedder)
     changed = index.index(chunks)
     where = s.QDRANT_URL or "in-memory Qdrant"

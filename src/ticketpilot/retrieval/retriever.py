@@ -55,7 +55,7 @@ class HybridRetriever:
         cls, settings: Settings, embedder: Embedder | None = None, ensure_index: bool = True
     ) -> HybridRetriever:
         chunks = chunk_kb(settings.kb_dir)
-        emb = embedder or FastEmbedEmbedder(settings.EMBEDDING_MODEL)
+        emb = embedder or FastEmbedEmbedder(settings.EMBEDDING_MODEL, settings.FASTEMBED_CACHE_DIR)
         vindex = VectorIndex(
             make_qdrant_client(settings.QDRANT_URL), settings.QDRANT_COLLECTION, emb
         )

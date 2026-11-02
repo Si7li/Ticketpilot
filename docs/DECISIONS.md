@@ -142,3 +142,8 @@ Template:
 ## 2026-11-02 — Langfuse trace tagging
 - **Decision:** every model call carries `langfuse_session_id = ticket ID`, `langfuse_trace_name`, and tags `prompt:<version>` and `node:<name>` (via a ContextVar set in the node wrapper). The route is logged in the terminal node's structured JSON log line and stored in results/API output.
 - **Reason:** routing happens after the last LLM call, so the route cannot be attached to the LLM traces without an extra Langfuse API call per ticket; session ID links all calls for a ticket for lookup.
+
+## 2026-11-02 — Docker layout
+- **Decision:** databases live in `/app/var` (named volume `app_data`) via `BUSINESS_DB_PATH` / `CHECKPOINT_DB_PATH`; `data/kb` and `data/seed` are baked into the image. The project is installed editable at `/app/src` so path resolution matches local runs. The fastembed model is downloaded in the build stage to `/opt/fastembed` and the runtime sets `HF_HUB_OFFLINE=1`. Host ports are `${API_PORT:-8000}` / `${UI_PORT:-8501}`.
+- **Reason:** a volume over `data/` would hide the KB and seed files; offline start was required by the spec; configurable host ports avoid clashes with services already on 8000.
+- **Note:** the container seeds with `--no-scenarios` because `data/seed/scenarios.yaml` is read-only in the image (it is generated and committed locally).

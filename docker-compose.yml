@@ -1,0 +1,52 @@
+# TicketPilot: Qdrant + API + review UI.  `docker compose up --build`
+# Langfuse is not included; point LANGFUSE_* in .env at Langfuse Cloud or your own instance.
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      BUSINESS_DB_PATH: /app/var/ticketpilot.db
+      CHECKPOINT_DB_PATH: /app/var/checkpoints.db
+    volumes:
+      - app_data:/app/var
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      qdrant:
+        condition: service_healthy
+
+  review-ui:
+    build: .
+    command: ["streamlit", "run", "src/ticketpilot/review_ui/app.py",
+              "--server.port", "8501", "--server.address", "0.0.0.0",
+              "--server.headless", "true", "--browser.gatherUsageStats", "false"]
+    environment:
+      API_URL: http://api:8000
+      SKIP_BOOTSTRAP: "1"
+    ports:
+      - "${UI_PORT:-8501}:8501"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=4)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  qdrant_storage:
+  app_data:

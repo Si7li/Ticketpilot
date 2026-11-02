@@ -63,6 +63,8 @@ class Settings(BaseSettings):
     QDRANT_URL: str = ""
     QDRANT_COLLECTION: str = "kestrel_kb"
     EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
+    # Docker bakes the embedding model here so containers start offline
+    FASTEMBED_CACHE_DIR: str | None = None
 
     # --- Observability (optional) ---
     LANGFUSE_PUBLIC_KEY: str | None = None

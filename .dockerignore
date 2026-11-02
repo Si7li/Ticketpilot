@@ -1,0 +1,13 @@
+.git
+.venv
+.env
+**/__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+data/*.db
+data/*.db-*
+evals/reports
+evals/.judge_cache
+TICKETPILOT_BUILD_SPEC.md
