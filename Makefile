@@ -3,7 +3,8 @@ RUN := $(UV) run
 SPLIT ?= dev
 
 .PHONY: setup lint format test cov seed index tickets split review-labels retrieval-eval \
-        eval-dev eval-test sweep api ui up down smoke
+        eval-dev eval-test sweep ablations calibration-export calibration-score time-manual \
+        gate readme-results api ui up down
 
 setup:
 	$(UV) sync --all-extras --frozen
@@ -20,7 +21,7 @@ format:
 	$(RUN) ruff format .
 
 test:
-	$(RUN) pytest
+	$(RUN) pytest --cov --cov-report=term:skip-covered --cov-fail-under=85
 
 cov:
 	$(RUN) pytest --cov --cov-report=term-missing
@@ -48,6 +49,30 @@ eval-dev:
 
 eval-test:
 	$(RUN) python -m evals.harness --split test --i-am-reporting
+
+# Latest real (non-dry-run) report directory for the given split
+LATEST_RUN = $(shell ls -d evals/reports/*-$(SPLIT) 2>/dev/null | sort | tail -1)
+
+sweep:
+	$(RUN) python -m evals.sweep --run $(LATEST_RUN)
+
+ablations:
+	$(RUN) python -m evals.ablations --split dev
+
+calibration-export:
+	$(RUN) python -m evals.calibration export --run $(LATEST_RUN) --n 50
+
+calibration-score:
+	$(RUN) python -m evals.calibration score
+
+time-manual:
+	$(RUN) python scripts/time_manual.py
+
+gate:
+	$(RUN) python -m evals.gate --current $(LATEST_RUN)/metrics.json
+
+readme-results:
+	$(RUN) python scripts/update_readme_results.py
 
 api:
 	$(RUN) uvicorn ticketpilot.api.main:app --host 0.0.0.0 --port 8000

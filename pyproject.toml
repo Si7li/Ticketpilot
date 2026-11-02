@@ -55,6 +55,8 @@ ignore = ["RUF001", "RUF002", "RUF003", "SIM300"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501"]
+"evals/*" = ["E501"]  # report generators build long Markdown f-strings
+"scripts/*" = ["E501"]  # CLI/report output
 
 [tool.ruff.lint.isort]
 known-first-party = ["ticketpilot", "tests", "evals", "scripts"]

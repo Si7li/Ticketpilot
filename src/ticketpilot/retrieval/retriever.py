@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 from typing import Any
 
 from pydantic import BaseModel
@@ -45,6 +46,9 @@ class HybridRetriever:
         self.vector = vector_index
         self.rrf_k = rrf_k
         self.default_mode: RetrievalMode = default_mode
+        # In-memory Qdrant and the embedder are shared across API/harness threads; searches are
+        # cheap next to LLM calls, so serialize them rather than rely on library thread-safety.
+        self._lock = threading.Lock()
 
     @classmethod
     def from_settings(
@@ -65,6 +69,10 @@ class HybridRetriever:
     def search(
         self, query: str, k: int = 5, mode: RetrievalMode | None = None
     ) -> list[RetrievedChunk]:
+        with self._lock:
+            return self._search(query, k, mode)
+
+    def _search(self, query: str, k: int, mode: RetrievalMode | None) -> list[RetrievedChunk]:
         mode = mode or self.default_mode
         if mode not in ("bm25", "vector", "hybrid"):
             raise ValueError(f"unknown retrieval mode: {mode}")

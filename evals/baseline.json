@@ -1,0 +1,1 @@
+{"note": "No baseline yet. Set with `python -m evals.gate --current <report>/metrics.json --update-baseline` after a human-approved dev run."}

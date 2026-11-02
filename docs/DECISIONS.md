@@ -101,3 +101,40 @@ Template:
 ## 2026-11-02 — Escalation holding reply is a fixed template
 - **Decision:** escalated tickets get a fixed holding reply (outbox `sent_by="auto"`), never the drafted reply.
 - **Reason:** escalated tickets include injection attempts; a template cannot echo injected content or promise outcomes.
+
+## 2026-11-02 — Ticket dataset composition
+- **Decision:** 205 labeled tickets = 120 Bitext-seeded (30 each for order_status, returns_refunds, account_billing, shipping_problem) + 30 drafted product questions + 55 drafted hard cases. Split 50 dev / 155 test.
+- **Reason:** Bitext has no product-question or sensitive intents (see `data/tickets/intent_map.yaml`), so those categories come from drafted tickets that a human verifies like every other label. `complaint` is rewritten into concrete damaged / damaged-without-photo / wrong-item problems. Spec said "~200 Bitext"; we sample 120 so the total stays ≈ 200 (dev 50 + test ~150).
+- **Alternatives considered:** sampling 200 Bitext tickets (4 categories only, no product questions in standard tickets).
+
+## 2026-11-02 — Bitext labels proposed by deterministic rules, not by an LLM
+- **Decision:** each sampled message gets a real seeded order chosen to fit the intent (e.g. an in-window, non-sale, single-item delivered order for `get_refund`), and gold labels are derived from that order by code. The agent model only rewrites the text (with the order facts given).
+- **Reason:** labels proposed by the same model family being evaluated would bias the eval; code-derived proposals are reproducible, and a human verifies all of them.
+
+## 2026-11-02 — Labels live in data/tickets/*.jsonl; split membership frozen in split_ids.json
+- **Decision:** the review tool edits the source label files; `write_split()` regenerates dev/test from them using the frozen ID assignment and refreshes `test.sha256`.
+- **Reason:** the spec wants both "review labels" and "warn if test.jsonl changes". With this design, only the label tool can change test.jsonl without tripping the hash warning, and verifying labels after the split doesn't reshuffle membership.
+
+## 2026-11-02 — In-window return requests create the refund immediately
+- **Decision:** KB return docs say the refund is set up when an in-window return is requested (pending human approval above $100), matching `issue_refund` rule 6.
+- **Reason:** the tool's return-window rule only makes sense if returns create refunds; the earlier KB text ("refund after inspection") contradicted the tool.
+
+## 2026-11-02 — Injection heuristics were written before the hard cases
+- **Decision:** the regex detector was not tuned against the hard-case injection tickets (13/14 flagged; the social-engineering one is deliberately regex-proof). Changes to it must be justified on dev tickets only.
+- **Reason:** most hard cases land in the test split; tuning on them would leak.
+
+## 2026-11-02 — Eval reports from non-standard data are marked dry runs
+- **Decision:** runs with `--limit`, `--tag`, or a non-default eval dir get a `-dryrun` suffix, a warning, and never update `evals/reports/latest/` or the README.
+- **Reason:** honesty rules: only full, real runs may feed published numbers.
+
+## 2026-11-02 — Judge evaluates the drafted reply, including on escalated tickets
+- **Decision:** the judge grades `draft_reply` for every ticket that has one; escalated customers actually receive a fixed holding reply.
+- **Reason:** spec defines hallucination over "drafted replies", and echo of injected instructions is most visible in drafts. This is stricter than grading only what is sent.
+
+## 2026-11-02 — Time-saved model
+- **Decision:** minutes/100 tickets with TicketPilot = human_review share × mean measured review time + escalate share × mean manual time; auto-sends count as 0 human minutes.
+- **Reason:** escalations still need a person; using measured manual time for them avoids overstating savings.
+
+## 2026-11-02 — Retriever searches are serialized with a lock
+- **Decision:** `HybridRetriever.search` takes a lock.
+- **Reason:** API thread pool and eval concurrency share one in-memory Qdrant client + embedder whose thread-safety is not documented; searches are milliseconds next to LLM calls.
