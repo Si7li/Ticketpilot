@@ -130,6 +130,6 @@ The harness refuses `--split test` without `--i-am-reporting`, warns at the top 
 
 - The store, customers, orders and policies are synthetic; Bitext messages are rewritten by the agent model, which can make them cleaner than real email.
 - The injection detector is a regex heuristic (it misses social engineering by design); the act loop and tools are the real defense. A trained classifier would raise detection recall.
-- Labels were proposed by deterministic rules and drafted by Claude Code; they are only trustworthy after human verification.
+- Bitext labels were proposed by deterministic rules, and the hard cases and product questions were written for this project; all labels are only trustworthy after human verification.
 - Pending refunds are approved by approving the reply; there is no separate refund-approval queue or audit UI yet.
 - Scaling to ~10k tickets/day: queue-based workers instead of synchronous requests, a Postgres checkpointer, cached embeddings for repeated policy queries, a smaller classifier in front of the agent, and per-ticket cost from the telemetry already collected here.
