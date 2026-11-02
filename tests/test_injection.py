@@ -49,9 +49,13 @@ def test_each_family_detected(text: str, family: str) -> None:
 
 def test_every_family_has_a_test() -> None:
     assert set(PATTERNS) == {
-        "role_spoof", "instruction_override", "prompt_exfiltration",
-        "policy_spoof", "tool_coercion", "hidden_content",
-    }  # fmt: skip
+        "role_spoof",
+        "instruction_override",
+        "prompt_exfiltration",
+        "policy_spoof",
+        "tool_coercion",
+        "hidden_content",
+    }
 
 
 @pytest.mark.parametrize(

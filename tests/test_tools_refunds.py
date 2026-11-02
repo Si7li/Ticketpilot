@@ -20,15 +20,27 @@ def test_under_limit_auto_approves(registry: ToolRegistry, ctx_for: Any) -> None
 
 def test_exactly_limit_auto_approves(registry: ToolRegistry, ctx_for: Any) -> None:
     ctx = ctx_for("sam.ortiz@example.com")
-    r = refund(registry, ctx, order_id="KO-10482", amount=100.0, method="original_payment",
-               refund_type="damaged")  # fmt: skip
+    r = refund(
+        registry,
+        ctx,
+        order_id="KO-10482",
+        amount=100.0,
+        method="original_payment",
+        refund_type="damaged",
+    )
     assert r.ok and not r.pending
 
 
 def test_over_limit_becomes_pending(registry: ToolRegistry, ctx_for: Any) -> None:
     ctx = ctx_for("sam.ortiz@example.com")
-    r = refund(registry, ctx, order_id="KO-10482", amount=189.0, method="original_payment",
-               refund_type="damaged")  # fmt: skip
+    r = refund(
+        registry,
+        ctx,
+        order_id="KO-10482",
+        amount=189.0,
+        method="original_payment",
+        refund_type="damaged",
+    )
     assert r.ok and r.pending
     assert r.data["status"] == "pending_approval" and r.data["approved_by"] is None
 
@@ -94,76 +106,144 @@ def test_other_customers_order_refused(registry: ToolRegistry, ctx_for: Any) -> 
 
 def test_model_supplied_email_rejected(registry: ToolRegistry, ctx_for: Any) -> None:
     ctx = ctx_for("tom.reyes@example.com")
-    r = refund(registry, ctx, order_id="KO-10482", amount=10.0, method="store_credit",
-               customer_email="sam.ortiz@example.com")  # fmt: skip
+    r = refund(
+        registry,
+        ctx,
+        order_id="KO-10482",
+        amount=10.0,
+        method="store_credit",
+        customer_email="sam.ortiz@example.com",
+    )
     assert not r.ok and r.arg_error
     assert ctx.db.get_active_refund("KO-10482") is None
 
 
 def test_model_supplied_ticket_id_rejected(registry: ToolRegistry, ctx_for: Any) -> None:
     ctx = ctx_for("tom.reyes@example.com")
-    r = refund(registry, ctx, order_id="KO-10571", amount=10.0, method="store_credit",
-               ticket_id="T-0001")  # fmt: skip
+    r = refund(
+        registry, ctx, order_id="KO-10571", amount=10.0, method="store_credit", ticket_id="T-0001"
+    )
     assert not r.ok and r.arg_error
 
 
 def test_international_window(registry: ToolRegistry, ctx_for: Any) -> None:
-    late = refund(registry, ctx_for("olivia.brown@example.co.uk"), order_id="KO-10548",
-                  amount=50.0, method="original_payment")  # fmt: skip
+    late = refund(
+        registry,
+        ctx_for("olivia.brown@example.co.uk"),
+        order_id="KO-10548",
+        amount=50.0,
+        method="original_payment",
+    )
     assert not late.ok and "international_return_window" in (late.error or "")
-    ok = refund(registry, ctx_for("lucas.schmidt@example.de"), order_id="KO-10662",
-                amount=50.0, method="original_payment")  # fmt: skip
+    ok = refund(
+        registry,
+        ctx_for("lucas.schmidt@example.de"),
+        order_id="KO-10662",
+        amount=50.0,
+        method="original_payment",
+    )
     assert ok.ok
 
 
 def test_domestic_window_and_peak_extension(registry: ToolRegistry, ctx_for: Any) -> None:
-    late = refund(registry, ctx_for("ben.carter@example.com"), order_id="KO-10605",
-                  amount=50.0, method="original_payment")  # fmt: skip
+    late = refund(
+        registry,
+        ctx_for("ben.carter@example.com"),
+        order_id="KO-10605",
+        amount=50.0,
+        method="original_payment",
+    )
     assert not late.ok and "domestic_return_window" in (late.error or "")
-    peak = refund(registry, ctx_for("grace.liu@example.com"), order_id="KO-10594",
-                  amount=50.0, method="original_payment")  # fmt: skip
+    peak = refund(
+        registry,
+        ctx_for("grace.liu@example.com"),
+        order_id="KO-10594",
+        amount=50.0,
+        method="original_payment",
+    )
     assert peak.ok  # 45 days, Peak tier has 60
 
 
 def test_damaged_window(registry: ToolRegistry, ctx_for: Any) -> None:
-    late = refund(registry, ctx_for("hannah.moore@example.com"), order_id="KO-10616",
-                  amount=50.0, method="original_payment", refund_type="damaged")  # fmt: skip
+    late = refund(
+        registry,
+        ctx_for("hannah.moore@example.com"),
+        order_id="KO-10616",
+        amount=50.0,
+        method="original_payment",
+        refund_type="damaged",
+    )
     assert not late.ok and "damaged_report_window" in (late.error or "")
 
 
 def test_not_delivered_cannot_be_returned(registry: ToolRegistry, ctx_for: Any) -> None:
-    r = refund(registry, ctx_for("aisha.bello@example.com"), order_id="KO-10560",
-               amount=50.0, method="original_payment")  # fmt: skip
+    r = refund(
+        registry,
+        ctx_for("aisha.bello@example.com"),
+        order_id="KO-10560",
+        amount=50.0,
+        method="original_payment",
+    )
     assert not r.ok and "return_requires_delivery" in (r.error or "")
 
 
 def test_lost_package_needs_lost_status(registry: ToolRegistry, ctx_for: Any) -> None:
-    stuck = refund(registry, ctx_for("daniel.kim@example.com"), order_id="KO-10559",
-                   amount=50.0, method="original_payment", refund_type="lost_package")  # fmt: skip
+    stuck = refund(
+        registry,
+        ctx_for("daniel.kim@example.com"),
+        order_id="KO-10559",
+        amount=50.0,
+        method="original_payment",
+        refund_type="lost_package",
+    )
     assert not stuck.ok
-    lost = refund(registry, ctx_for("chloe.martin@example.com"), order_id="KO-10651",
-                  amount=89.0, method="original_payment", refund_type="lost_package")  # fmt: skip
+    lost = refund(
+        registry,
+        ctx_for("chloe.martin@example.com"),
+        order_id="KO-10651",
+        amount=89.0,
+        method="original_payment",
+        refund_type="lost_package",
+    )
     assert lost.ok and not lost.pending
 
 
 def test_price_adjustment_store_credit_only(registry: ToolRegistry, ctx_for: Any) -> None:
     ctx = ctx_for("ethan.clark@example.com")
-    card = refund(registry, ctx, order_id="KO-10706", amount=20.0, method="original_payment",
-                  refund_type="price_adjustment")  # fmt: skip
+    card = refund(
+        registry,
+        ctx,
+        order_id="KO-10706",
+        amount=20.0,
+        method="original_payment",
+        refund_type="price_adjustment",
+    )
     assert not card.ok
-    credit = refund(registry, ctx, order_id="KO-10706", amount=20.0, method="store_credit",
-                    refund_type="price_adjustment")  # fmt: skip
+    credit = refund(
+        registry,
+        ctx,
+        order_id="KO-10706",
+        amount=20.0,
+        method="store_credit",
+        refund_type="price_adjustment",
+    )
     assert credit.ok
 
 
 def test_skus_scope(registry: ToolRegistry, ctx_for: Any) -> None:
     ctx = ctx_for("tom.reyes@example.com")
-    bad = refund(registry, ctx, order_id="KO-10571", amount=10.0, method="store_credit",
-                 skus=["NOPE"])  # fmt: skip
+    bad = refund(
+        registry, ctx, order_id="KO-10571", amount=10.0, method="store_credit", skus=["NOPE"]
+    )
     assert not bad.ok
 
 
 def test_bad_method_is_arg_error(registry: ToolRegistry, ctx_for: Any) -> None:
-    r = refund(registry, ctx_for("tom.reyes@example.com"), order_id="KO-10571", amount=10.0,
-               method="bitcoin")  # fmt: skip
+    r = refund(
+        registry,
+        ctx_for("tom.reyes@example.com"),
+        order_id="KO-10571",
+        amount=10.0,
+        method="bitcoin",
+    )
     assert not r.ok and r.arg_error

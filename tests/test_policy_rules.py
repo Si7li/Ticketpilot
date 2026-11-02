@@ -10,10 +10,17 @@ REF = date(2026, 10, 1)
 
 
 def _order(delivered: str | None, status: str = "delivered", ordered: str = "2026-09-01") -> Order:
-    return Order(id="KO-10000", customer_id="C-0001",
-                 items=[OrderItem(sku="X", name="x", unit_price=10, category="tent")],
-                 amount=10, is_sale=False, status=status, order_date=ordered,  # type: ignore[arg-type]
-                 delivery_date=delivered, shipping_method="standard")  # fmt: skip
+    return Order(
+        id="KO-10000",
+        customer_id="C-0001",
+        items=[OrderItem(sku="X", name="x", unit_price=10, category="tent")],
+        amount=10,
+        is_sale=False,
+        status=status,
+        order_date=ordered,  # type: ignore[arg-type]
+        delivery_date=delivered,
+        shipping_method="standard",
+    )
 
 
 def _cust(country: str = "US", tier: str = "trail") -> Customer:
@@ -37,8 +44,9 @@ def s() -> Settings:
         (None, "US", "trail", False, "return_requires_delivery"),
     ],
 )
-def test_return_window(s: Settings, delivered: str | None, country: str, tier: str, ok: bool,
-                       rule: str) -> None:  # fmt: skip
+def test_return_window(
+    s: Settings, delivered: str | None, country: str, tier: str, ok: bool, rule: str
+) -> None:
     res = pr.return_window_ok(_order(delivered), _cust(country, tier), REF, s)
     assert (res.ok, res.rule) == (ok, rule)
 

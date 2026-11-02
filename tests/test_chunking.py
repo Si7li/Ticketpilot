@@ -72,14 +72,26 @@ def test_kb_meets_spec() -> None:
     assert 60 <= len(docs) <= 80
     ids = {d.doc_id for d in docs}
     required = {
-        "policy/returns-domestic", "policy/returns-international", "policy/restocking-fees",
-        "policy/final-sale", "policy/sale-items", "policy/damaged-items", "policy/wrong-item",
-        "policy/lost-packages", "policy/refund-methods", "policy/refund-approval",
-        "policy/order-changes", "policy/shipping-times", "policy/free-shipping",
-        "policy/warranty", "policy/price-adjustment", "policy/double-charges",
-        "policy/loyalty-program", "policy/escalation-guidelines",
+        "policy/returns-domestic",
+        "policy/returns-international",
+        "policy/restocking-fees",
+        "policy/final-sale",
+        "policy/sale-items",
+        "policy/damaged-items",
+        "policy/wrong-item",
+        "policy/lost-packages",
+        "policy/refund-methods",
+        "policy/refund-approval",
+        "policy/order-changes",
+        "policy/shipping-times",
+        "policy/free-shipping",
+        "policy/warranty",
+        "policy/price-adjustment",
+        "policy/double-charges",
+        "policy/loyalty-program",
+        "policy/escalation-guidelines",
         "policy/privacy-and-account-security",
-    }  # fmt: skip
+    }
     assert required <= ids
     for d in docs:  # doc_id must match the file path
         path = PROJECT_ROOT / "data" / "kb" / f"{d.doc_id}.md"
